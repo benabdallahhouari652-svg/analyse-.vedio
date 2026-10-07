@@ -900,6 +900,50 @@ table.tbl td.n{font-variant-numeric:tabular-nums;text-align:center}
 .qr-img{width:210px;height:210px;background:#fff;border-radius:12px;padding:8px;border:1px solid var(--line)}
 .qr-url{direction:ltr;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:var(--acc);margin:10px 0 4px;word-break:break-all}
 
+/* ============================================================
+   حزمة «احتكاك صفر» — استرجاع الفيديو + سجل التشخيص
+   ============================================================ */
+.vid-banner{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px;padding:8px 10px;
+  border:1px solid rgba(255,176,32,.4);border-radius:var(--r2);
+  background:linear-gradient(135deg,rgba(255,176,32,.13),rgba(255,176,32,.05));font-size:12px;
+}
+.vb-ic{font-size:15px}
+.vb-txt{color:var(--txt);line-height:1.6}
+.vb-txt b{color:#ffd479}
+.vb-recent{display:flex;gap:5px;flex-wrap:wrap;width:100%;margin-top:2px}
+.vb-chip{
+  background:var(--panel2);border:1px solid var(--line);color:var(--txt2);border-radius:999px;
+  padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit;transition:.13s;
+  max-width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.vb-chip:hover{color:var(--txt);border-color:var(--acc);background:#18283c}
+.diag-badge{
+  position:absolute;top:-3px;inset-inline-end:-3px;background:var(--danger);color:#fff;
+  border-radius:999px;font-size:9px;padding:0 4px;font-weight:800;line-height:14px;
+}
+.btn.icon{position:relative}
+.dg-hint{font-size:11.5px;line-height:1.7;color:var(--txt2);background:var(--panel2);
+  border:1px solid var(--line);border-radius:var(--r2);padding:8px 10px;margin-bottom:10px}
+.dg-h{font-size:12px;color:var(--txt2);margin:10px 0 5px}
+.dg-env{display:flex;flex-direction:column;gap:3px;font-size:11px}
+.dg-row{display:flex;gap:8px;background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:4px 8px}
+.dg-row b{color:var(--txt2);flex:0 0 74px;font-weight:600}
+.dg-row span{color:var(--txt);word-break:break-all;direction:ltr;text-align:right}
+.dg-list{display:flex;flex-direction:column;gap:4px;max-height:230px;overflow-y:auto;margin-top:6px}
+.dg-item{display:flex;gap:7px;align-items:baseline;font-size:11px;background:var(--bg2);
+  border:1px solid var(--line);border-inline-start:3px solid var(--line2);border-radius:6px;padding:5px 8px}
+.dg-item b{color:var(--txt3);font-variant-numeric:tabular-nums;font-weight:600}
+.dg-k{color:var(--txt3);font-size:9.5px;text-transform:uppercase}
+.dg-m{color:var(--txt);word-break:break-word;flex:1}
+.dg-m i{color:var(--txt3);font-style:normal;font-size:10px}
+.dg-item.error,.dg-item.toast{border-inline-start-color:var(--danger)}
+.dg-item.promise{border-inline-start-color:var(--warn)}
+.dg-item.info{border-inline-start-color:var(--acc2)}
+.dg-empty{font-size:11.5px;color:var(--txt2);background:var(--bg2);border:1px dashed var(--line2);
+  border-radius:var(--r2);padding:12px;text-align:center}
+.dg-actions{margin-top:10px;display:flex;gap:6px}
+
 </style>
 </head>
 <body>
@@ -962,6 +1006,7 @@ table.tbl td.n{font-variant-numeric:tabular-nums;text-align:center}
       </div>
     </div>
     <button class="btn icon" id="btnHelp" title="اختصارات لوحة المفاتيح">؟</button>
+    <button class="btn icon" id="btnDiag" title="سجل التشخيص — أرسله عند أي عطل">🩺<span class="diag-badge" id="diagCount" hidden>0</span></button>
     <button class="btn icon dev" id="btnAbout" title="المطوّر">
       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="12" cy="8" r="3.4"/><path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"/>
@@ -1142,6 +1187,17 @@ table.tbl td.n{font-variant-numeric:tabular-nums;text-align:center}
           <button class="fe-ok" id="floatOk">إضافة</button>
         </div>
       </div>
+    </div>
+
+    <!-- شريط استرجاع الفيديو (ذاكرة الفيديو) -->
+    <div class="vid-banner" id="vidBanner" hidden>
+      <span class="vb-ic">🎬</span>
+      <span class="vb-txt" id="vbText"></span>
+      <div class="spacer"></div>
+      <button class="btn sm primary" id="vbRestore" hidden>🔄 إعادة تحميل الفيديو</button>
+      <button class="btn sm ghost" id="vbPick">📂 اختيار ملف</button>
+      <button class="tbtn" id="vbClose" title="إخفاء">✕</button>
+      <div class="vb-recent" id="vbRecent"></div>
     </div>
 
     <!-- شريط النقل -->
@@ -1677,6 +1733,29 @@ table.tbl td.n{font-variant-numeric:tabular-nums;text-align:center}
       <div class="spacer"></div>
       <button class="btn ghost" id="btnShareCard">📤 مشاركة على واتساب</button>
       <button class="btn primary" id="cardDownload">⬇ تنزيل الصورة PNG</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== نافذة سجل التشخيص ===================== -->
+<div class="modal" id="diagModal" hidden>
+  <div class="modal-card wide">
+    <div class="modal-head"><h3>🩺 سجل التشخيص</h3><button class="tbtn" id="diagClose">✕</button></div>
+    <div class="modal-body">
+      <p class="dg-hint">إن تعطّل شيء أو ظهر خطأ، أرسل هذا التقرير للمطوّر على واتساب — يساعدنا على إصلاحه بسرعة. <b>لا يحتوي على فيديوهاتك ولا ملاحظاتك</b>، فقط معلومات تقنية.</p>
+      <h4 class="dg-h">بيئة التشغيل</h4>
+      <div class="dg-env" id="diagEnv"></div>
+      <h4 class="dg-h">الأحداث المسجَّلة</h4>
+      <div class="dg-list" id="diagList"></div>
+      <div class="dg-actions">
+        <button class="btn ghost sm" id="diagReset">🧹 انسَ فيديو هذه المباراة</button>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" id="diagClear">🗑 تفريغ السجل</button>
+      <div class="spacer"></div>
+      <button class="btn ghost" id="diagCopy">📋 نسخ</button>
+      <button class="btn primary" id="diagShare">📤 إرسال على واتساب</button>
     </div>
   </div>
 </div>
@@ -3817,6 +3896,26 @@ table.tbl td.n{font-variant-numeric:tabular-nums;text-align:center}
       v.pause();
     };
 
+    // ⏱ تقدير المدة قبل البدء (التصدير بالزمن الحقيقي)
+    try {
+      const est = app.exportEstimate ? app.exportEstimate() : null;
+      if (est && est.sec > 40 && app.ask) {
+        const go = await app.ask('⏱ مدة التصدير المتوقعة',
+          '<p>سيستغرق التصدير نحو <b>' + esc(est.long) + '</b> — لأن التسجيل يجري بالزمن الحقيقي.</p>' +
+          '<p class="muted small">اترك الجهاز مفتوحاً والشاشة مضاءة، ويمكنك الإلغاء في أي وقت.</p>',
+          'ابدأ التصدير', false);
+        if (!go) {
+          $('#btnRender').disabled = false;
+          $('#btnCancelRender').hidden = true;
+          $('#renderProgress').hidden = true;
+          $('#renderStatus').textContent = 'أُلغي التصدير قبل البدء (المدة المتوقعة: ' + est.short + ')';
+          try { v.playbackRate = oldRate; } catch (e) { }
+          if (global.__diagPush) global.__diagPush('info', 'أُلغي التصدير قبل البدء — المدة ' + est.short);
+          return false;
+        }
+      }
+    } catch (e) { /* لا نُعطّل التصدير بسبب التقدير */ }
+
     rec.start(200);
     try {
       if (intro > 0) {
@@ -3991,7 +4090,7 @@ table.tbl td.n{font-variant-numeric:tabular-nums;text-align:center}
     return {
       match: this.state.match, cats: this.state.cats, events: this.state.events,
       drawKeys: this.state.drawKeys, annos: this.state.annos, assembly: this.asm.items,
-      fps: this.state.fps, videoName: this.state.videoName, version: 1
+      fps: this.state.fps, videoName: this.state.videoName, videoSrc: this.state.videoSrc, version: 1
     };
   };
 
@@ -4043,6 +4142,7 @@ table.tbl td.n{font-variant-numeric:tabular-nums;text-align:center}
       this.asm.items = d.assembly || [];
       this.state.fps = d.fps || 25;
       this.state.videoName = d.videoName || '';
+      this.state.videoSrc = d.videoSrc || null;   // ذاكرة الفيديو (حزمة احتكاك صفر)
       $('#fps').value = this.state.fps;
     } catch (e) { console.warn('applyState failed', e); }
     // تعبئة الحقول
@@ -7278,6 +7378,376 @@ table.tbl td.n{font-variant-numeric:tabular-nums;text-align:center}
   }
 
   global.Share = { APP_URL, MP4_CANDIDATES, WEBM_CANDIDATES, firstSupported };
+})(window);
+
+</script>
+<script>
+/* session.js */
+/* session.js */
+/* ==========================================================
+   Live DZ Analyze — session.js   (حزمة «احتكاك صفر»)
+   ----------------------------------------------------------
+   1) ذاكرة الفيديو: إعادة تحميل بضغطة واحدة + آخر 5 فيديوهات
+      (رابط → تلقائي · ملف → باختيار واحد مع تأكيد «نفس الملف»)
+   2) سجل تشخيص محلي: يلتقط الأعطال ويُرسلها على واتساب (بلا سيرفر)
+   3) تقدير مدة التصدير قبل بدئه
+   ========================================================== */
+(function (global) {
+  'use strict';
+  const { $, $$, el, esc, fmt, clamp, toast, store } = U;
+
+  const RECENT_KEY = 'livedz_recent_videos';
+  const DIAG_KEY = 'livedz_diag';
+  const DIAG_MAX = 30;
+  const mb = b => b ? (b / 1048576).toFixed(b > 10485760 ? 0 : 1) + ' م.ب' : '';
+
+  /* ==========================================================
+     1) ذاكرة الفيديو
+     ========================================================== */
+  App.prototype.matchTitle = function () {
+    const m = this.state.match || {};
+    return (m.homeName || 'مباراة') + (m.awayName ? ' × ' + m.awayName : '');
+  };
+
+  App.prototype.recentVideos = function () {
+    try { return store.get(RECENT_KEY) || []; } catch (e) { return []; }
+  };
+
+  App.prototype.rememberVideo = function (info) {
+    if (!info || !(info.name || info.url)) return;
+    const rec = Object.assign({ at: Date.now() }, info);
+    this.state.videoSrc = rec;
+    try {
+      const arr = this.recentVideos().filter(r => !(r.kind === rec.kind && (r.url || r.name) === (rec.url || rec.name)));
+      arr.unshift(Object.assign({}, rec, { title: this.matchTitle() }));
+      store.set(RECENT_KEY, arr.slice(0, 5));
+    } catch (e) { }
+    this.markDirty();
+  };
+
+  App.prototype.clearVideoMemory = async function () {
+    try { store.set(RECENT_KEY, []); } catch (e) { }
+    this.state.videoSrc = null;
+    if (this.curId && MatchStore.setMeta) { try { await MatchStore.setMeta('vd:' + this.curId, null); } catch (e) { } }
+    this.renderVideoBanner();
+    toast('🧹 نُسي فيديو هذه المباراة');
+  };
+
+  /* ---- مقابض الملفات (Chrome فقط) ---- */
+  App.prototype.saveVideoHandle = async function (id, handle) {
+    if (!id || !handle || !MatchStore.setMeta) return;
+    try { await MatchStore.setMeta('vd:' + id, handle); } catch (e) { }
+  };
+  App.prototype.getVideoHandle = async function (id) {
+    if (!id || !MatchStore.getMeta) return null;
+    try { return await MatchStore.getMeta('vd:' + id); } catch (e) { return null; }
+  };
+
+  App.prototype.renderVideoBanner = function () {
+    const b = $('#vidBanner');
+    if (!b) return;
+    const info = this.state.videoSrc;
+    const rec = this.recentVideos();
+    if (this.hasVideo || (!info && !rec.length)) { b.hidden = true; return; }
+    b.hidden = false;
+    const txt = $('#vbText');
+    if (txt) {
+      txt.innerHTML = info
+        ? '⚠️ فيديو هذه المباراة غير محمّل — كان: <b>' + esc(info.name || info.url || '') + '</b>' +
+          (info.size ? ' (' + mb(info.size) + ')' : '') + (info.kind === 'url' ? ' · رابط محفوظ ✅' : '')
+        : '🎬 لم يُحمَّل فيديو — اختر أحد آخر ما عملت عليه:';
+    }
+    const r = $('#vbRestore');
+    if (r) {
+      r.hidden = !info;
+      r.textContent = info && info.kind === 'url' ? '🔄 إعادة التحميل من الرابط' : '🔄 إعادة تحميل الفيديو';
+    }
+    const box = $('#vbRecent');
+    if (box) {
+      box.innerHTML = rec.map((x, i) =>
+        '<button class="vb-chip" data-i="' + i + '">' + (x.kind === 'url' ? '🔗 ' : '📂 ') +
+        esc(String(x.name || x.url || '').slice(-26)) + (x.title ? ' — ' + esc(x.title.slice(0, 18)) : '') + '</button>').join('');
+    }
+  };
+
+  App.prototype.restoreVideo = async function (info) {
+    if (!info) return false;
+    if (info.kind === 'url' && info.url) {
+      this.loadUrl(info.url);
+      diagPush('info', 'إعادة تحميل الفيديو من الرابط');
+      return true;
+    }
+    // ملف: إن كان المتصفح يحفظ المقبض (Chrome) نستعيده بضغطة واحدة
+    const h = this.curId ? await this.getVideoHandle(this.curId) : null;
+    if (h && h.getFile) {
+      try {
+        let perm = 'granted';
+        if (h.queryPermission) perm = await h.queryPermission({ mode: 'read' });
+        if (perm !== 'granted' && h.requestPermission) perm = await h.requestPermission({ mode: 'read' });
+        if (perm === 'granted') {
+          const f = await h.getFile();
+          this.loadFile(f);
+          this._restoredFrom = f.name;
+          return true;
+        }
+      } catch (e) { /* نتابع بالاختيار اليدوي */ }
+    }
+    // بلا مقبض: نطلب اختيار الملف ونقارنه بالمحفوظ
+    this._expectedFile = info;
+    this.pickVideoFile();
+    return false;
+  };
+
+  App.prototype.pickVideoFile = async function () {
+    if (global.showOpenFilePicker) {
+      try {
+        const [h] = await global.showOpenFilePicker({
+          multiple: false,
+          types: [{ description: 'فيديو', accept: { 'video/*': ['.mp4', '.webm', '.mov', '.mkv', '.avi', '.m4v'] } }]
+        });
+        const f = await h.getFile();
+        this.loadFile(f);
+        if (this.curId) this.saveVideoHandle(this.curId, h);
+        return;
+      } catch (e) {
+        if (e && (e.name === 'AbortError' || e.name === 'SecurityError')) return;
+      }
+    }
+    const inp = $('#fileInput');
+    if (inp) inp.click();
+  };
+
+  /* ينبّه إن اختار المحلّل ملفاً مختلفاً عن المحفوظ */
+  App.prototype.compareExpectedFile = function (file) {
+    const exp = this._expectedFile;
+    this._expectedFile = null;
+    if (!exp || !file) return;
+    const same = exp.name === file.name && (!exp.size || Math.abs(exp.size - file.size) < 2048);
+    if (same) toast('✅ نفس الملف — تم استرجاع المباراة', 'ok', 3200);
+    else toast('⚠️ ملف مختلف عن المحفوظ (كان: ' + exp.name + ') — حدّثت الذاكرة إلى الملف الجديد', 'warn', 5200);
+    diagPush('info', 'اختيار ملف: ' + file.name + ' | متطابق: ' + (same ? 'نعم' : 'لا'));
+  };
+
+  /* ==========================================================
+     2) سجل التشخيص المحلي
+     ========================================================== */
+  App.prototype.environment = function () {
+    const n = global.navigator || {};
+    const mode = (global.MatchStore && MatchStore.modeLabel) ? MatchStore.modeLabel() : '—';
+    return {
+      النمط: mode,
+      الشاشة: (global.screen ? screen.width + '×' + screen.height : '—'),
+      الجهاز: String(n.userAgent || '').slice(0, 120),
+      الرابط: global.location ? location.href.slice(0, 80) : '',
+      المباراة: this.matchTitle(),
+      فيديو: this.hasVideo ? ('محمّل: ' + (this.state.videoName || '')) : 'غير محمّل',
+      أحداث: (this.state.events || []).length,
+      لاعبون: ((this.state.match || {}).homeRoster || []).length + ((this.state.match || {}).awayRoster || []).length,
+      وقت: new Date().toLocaleString('ar-DZ')
+    };
+  };
+
+  function diagAll() { try { return store.get(DIAG_KEY) || []; } catch (e) { return []; } }
+
+  function diagPush(kind, msg, extra) {
+    try {
+      const arr = diagAll();
+      const last = arr[0];
+      if (last && last.kind === kind && last.msg === String(msg) && Date.now() - last.t < 1500) return;   // لا نكرّر
+      arr.unshift({ t: Date.now(), kind: kind, msg: String(msg === undefined ? '' : msg).slice(0, 300), ctx: String(extra || '').slice(0, 200) });
+      store.set(DIAG_KEY, arr.slice(0, DIAG_MAX));
+      diagBadge();
+    } catch (e) { }
+  }
+  global.__diagPush = diagPush;   // يستعملها التصدير أيضاً
+
+  function diagBadge() {
+    const b = $('#diagCount');
+    if (!b) return;
+    const n = diagAll().filter(x => x.kind === 'error' || x.kind === 'promise' || x.kind === 'toast').length;
+    b.hidden = !n;
+    b.textContent = String(Math.min(n, 99));
+  }
+
+  App.prototype.diagReport = function () {
+    const env = this.environment();
+    const head = '🩺 تقرير تشخيص — Live DZ Analyze\n' + Object.keys(env).map(k => k + ': ' + env[k]).join('\n');
+    const list = diagAll();
+    if (!list.length) return head + '\n\n✅ لا أخطاء مسجَّلة.';
+    return head + '\n\n📋 آخر ' + list.length + ' حدثاً:\n' + list.map(x => {
+      const d = new Date(x.t);
+      const hh = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') + ':' + String(d.getSeconds()).padStart(2, '0');
+      return '[' + hh + '] ' + x.kind + ': ' + x.msg + (x.ctx ? '  (' + x.ctx + ')' : '');
+    }).join('\n');
+  };
+
+  App.prototype.renderDiag = function () {
+    const box = $('#diagList');
+    if (!box) return;
+    const env = this.environment();
+    const envBox = $('#diagEnv');
+    if (envBox) envBox.innerHTML = Object.keys(env).map(k =>
+      '<div class="dg-row"><b>' + esc(k) + '</b><span>' + esc(env[k]) + '</span></div>').join('');
+    const list = diagAll();
+    box.innerHTML = list.length ? list.map(x => {
+      const d = new Date(x.t);
+      const hh = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+      return '<div class="dg-item ' + esc(x.kind) + '"><b>' + hh + '</b> <span class="dg-k">' + esc(x.kind) + '</span>' +
+        '<span class="dg-m">' + esc(x.msg) + (x.ctx ? ' <i>' + esc(x.ctx) + '</i>' : '') + '</span></div>';
+    }).join('') : '<div class="dg-empty">✅ لم يُسجَّل أي خطأ — التطبيق يعمل بسلاسة.</div>';
+    diagBadge();
+  };
+
+  App.prototype.openDiag = function () {
+    if ($('#diagModal')) { $('#diagModal').hidden = false; this.renderDiag(); }
+  };
+
+  App.prototype.clearDiag = function () {
+    try { store.set(DIAG_KEY, []); } catch (e) { }
+    this.renderDiag();
+    toast('🧹 فُرّغ السجل');
+  };
+
+  App.prototype.copyDiag = async function () {
+    const t = this.diagReport();
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(t);
+        toast('✅ نُسخ التقرير — ألصقه في أي مكان', 'ok');
+        return true;
+      }
+    } catch (e) { }
+    toast('تعذّر النسخ التلقائي — افتح السجل وانسخه يدوياً', 'warn', 4200);
+    return false;
+  };
+
+  App.prototype.shareDiag = async function () {
+    const t = this.diagReport();
+    if (this.shareOrWhatsApp) return this.shareOrWhatsApp({ text: t });
+    try { global.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank'); } catch (e) { }
+    return 'whatsapp';
+  };
+
+  /* ==========================================================
+     3) تقدير مدة التصدير
+     ========================================================== */
+  App.prototype.exportEstimate = function () {
+    const sec = (this.asm && this.asm.totalDuration) ? this.asm.totalDuration() : 0;
+    const m = Math.floor(sec / 60), s = Math.round(sec % 60);
+    return {
+      sec,
+      short: m ? (m + ' د ' + (s ? s + ' ث' : '')) : (s + ' ث'),
+      long: m ? (m + ' دقيقة' + (s ? ' و' + s + ' ثانية' : '')) : (s + ' ثانية')
+    };
+  };
+
+  /* ==========================================================
+     4) الربط
+     ========================================================== */
+  App.prototype.bindSessionUI = function () {
+    const self = this;
+    const on = (id, fn) => { const b = $(id); if (b) b.onclick = fn; };
+
+    // أزرار تحميل الفيديو: مقبض ملف حقيقي إن توفّر (Chrome) وإلا المُدخل العادي
+    const pick = () => self.pickVideoFile();
+    on('#btnLoadVideo', pick); on('#btnLoadVideo2', pick);
+
+    on('#vbRestore', () => self.restoreVideo(self.state.videoSrc));
+    on('#vbPick', () => { self._expectedFile = self.state.videoSrc || null; self.pickVideoFile(); });
+    on('#vbClose', () => { const b = $('#vidBanner'); if (b) b.hidden = true; });
+    const chips = $('#vbRecent');
+    if (chips) chips.onclick = e => {
+      const b = e.target.closest('.vb-chip');
+      if (!b) return;
+      const r = self.recentVideos()[+b.dataset.i];
+      if (r) self.restoreVideo(r);
+    };
+
+    // التشخيص
+    on('#btnDiag', () => self.openDiag());
+    on('#diagClose', () => { $('#diagModal').hidden = true; });
+    on('#diagCopy', () => self.copyDiag());
+    on('#diagShare', () => self.shareDiag());
+    on('#diagClear', () => self.clearDiag());
+    on('#diagReset', () => self.clearVideoMemory());
+
+    diagBadge();
+  };
+
+  /* ==========================================================
+     5) الالتقاط التلقائي
+     ========================================================== */
+  global.addEventListener('error', e => {
+    if (!e) return;
+    diagPush('error', e.message || 'خطأ مورد', (e.filename ? String(e.filename).slice(-60) + ':' + (e.lineno || 0) : ''));
+  });
+  global.addEventListener('unhandledrejection', e => {
+    const r = e && e.reason;
+    diagPush('promise', (r && (r.message || r.name)) || String(r || 'رفض غير معالج'));
+  });
+
+  /* التقاط كل تنبيه خطأ يظهر للمستخدم (من أي وحدة) */
+  global.addEventListener('DOMContentLoaded', () => {
+    const wrap = $('#toastWrap');
+    if (!wrap || !global.MutationObserver) return;
+    new MutationObserver(muts => {
+      muts.forEach(m => Array.prototype.forEach.call(m.addedNodes, n => {
+        if (n && n.classList && n.classList.contains('toast') && (n.classList.contains('err') || n.classList.contains('warn'))) {
+          diagPush(n.classList.contains('err') ? 'toast' : 'toast', n.textContent || '');
+        }
+      }));
+    }).observe(wrap, { childList: true });
+    diagBadge();
+  });
+
+  /* ==========================================================
+     6) توسيع الدوال
+     ========================================================== */
+  const origLoadFile = App.prototype.loadFile;
+  App.prototype.loadFile = function (file) {
+    const r = origLoadFile.call(this, file);
+    if (file) {
+      this.compareExpectedFile(file);
+      this.rememberVideo({ kind: 'file', name: file.name, size: file.size, lastModified: file.lastModified || 0, matchId: this.curId || '' });
+    }
+    this.renderVideoBanner();
+    return r;
+  };
+
+  const origLoadUrl = App.prototype.loadUrl;
+  App.prototype.loadUrl = function (u) {
+    const r = origLoadUrl.call(this, u);
+    if (u) this.rememberVideo({ kind: 'url', url: u, name: String(u).split('/').pop().slice(0, 60) });
+    this.renderVideoBanner();
+    return r;
+  };
+
+  const origRefresh3 = App.prototype.refreshAll;
+  App.prototype.refreshAll = function () {
+    origRefresh3.call(this);
+    this.renderVideoBanner();
+  };
+
+  const origBoot4 = App.prototype.bootLibrary;
+  if (origBoot4) {
+    App.prototype.bootLibrary = function () {
+      this.bindSessionUI();
+      diagPush('info', 'بدء الجلسة — ' + (global.MatchStore && MatchStore.modeLabel ? MatchStore.modeLabel() : ''));
+      return origBoot4.call(this);
+    };
+  }
+
+  /* فتح مباراة من المكتبة → نعرض شريط استرجاع الفيديو */
+  const origOpenMatch = App.prototype.openMatch;
+  if (origOpenMatch) {
+    App.prototype.openMatch = async function (id) {
+      const r = await origOpenMatch.apply(this, arguments);
+      this.renderVideoBanner();
+      return r;
+    };
+  }
+
+  global.Session = { recentVideosKey: RECENT_KEY, diagKey: DIAG_KEY, diagPush };
 })(window);
 
 </script>
