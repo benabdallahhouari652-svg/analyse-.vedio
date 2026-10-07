@@ -1,0 +1,26 @@
+{
+  "name": "Live DZ Analyze — استوديو تحليل الفيديو الرياضي",
+  "short_name": "Live DZ",
+  "description": "استوديو جزائري لتحليل مقاطع الفيديو الرياضية: تقطيع 24 فئة، رسم تكتيكي على الفيديو، سبورة تشكيلات، إحصائيات ومونتاج وتصدير — يعمل بلا إنترنت.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "fullscreen"],
+  "orientation": "any",
+  "background_color": "#0b1220",
+  "theme_color": "#0b1220",
+  "categories": ["sports", "productivity", "utilities"],
+  "prefer_related_applications": false,
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "تحميل فيديو", "short_name": "فيديو", "url": "./?action=load" },
+    { "name": "المباراة التجريبية", "short_name": "تجريبي", "url": "./?action=demo" }
+  ]
+}
